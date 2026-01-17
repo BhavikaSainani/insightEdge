@@ -112,6 +112,228 @@ ROLE_DEFINITIONS = {
     }
 }
 
+# --- Global Skill Arbitrage Data (Simulated) ---
+# We define demand/supply per sector to make recommendations dynamic
+REGIONAL_DEMAND_DATA = [
+    {
+        "region": "Southeast Asia",
+        "country": "Singapore",
+        "city": "Global Hub",
+        "flag": "🇸🇬",
+        "sector_scores": {
+            "Data Science": {"demand": 90, "supply": 40},
+            "IoT": {"demand": 85, "supply": 35},
+            "Smart Grid": {"demand": 80, "supply": 45},
+            "Sustainability": {"demand": 70, "supply": 50},
+            "Software": {"demand": 75, "supply": 60}
+        },
+        "top_skills": ["Urban Data Analytics", "IoT", "Smart Grid", "GIS", "Python"],
+        "avg_salary_usd": 78000,
+        "cost_of_living_index": 70,
+        "remote_friendly": True,
+        "visa_ease": "High",
+        "description": "Singapore is a global leader in Smart Nation initiatives, prioritizing Data and IoT."
+    },
+    {
+        "region": "Europe",
+        "country": "Germany",
+        "city": "Berlin/Munich",
+        "flag": "🇩🇪",
+        "sector_scores": {
+            "Data Science": {"demand": 70, "supply": 55},
+            "IoT": {"demand": 80, "supply": 45},
+            "Smart Grid": {"demand": 90, "supply": 40},
+            "Sustainability": {"demand": 95, "supply": 35},
+            "Software": {"demand": 80, "supply": 60}
+        },
+        "top_skills": ["Smart Infrastructure", "IoT", "Energy Systems", "Sustainability", "Carbon Accounting"],
+        "avg_salary_usd": 72000,
+        "cost_of_living_index": 65,
+        "remote_friendly": True,
+        "visa_ease": "Medium",
+        "description": "Germany is the heart of European sustainability and smart infrastructure engineering."
+    },
+    {
+        "region": "Middle East",
+        "country": "UAE",
+        "city": "Dubai",
+        "flag": "🇦🇪",
+        "sector_scores": {
+            "Data Science": {"demand": 85, "supply": 30},
+            "IoT": {"demand": 95, "supply": 25},
+            "Smart Grid": {"demand": 75, "supply": 40},
+            "Sustainability": {"demand": 65, "supply": 50},
+            "Software": {"demand": 90, "supply": 45}
+        },
+        "top_skills": ["Urban AI", "IoT", "Autonomous Transport", "Civic Tech", "Smart Mobility"],
+        "avg_salary_usd": 85000,
+        "cost_of_living_index": 75,
+        "remote_friendly": False,
+        "visa_ease": "High",
+        "description": "Dubai is a playground for futuristic IoT and autonomous urban transportation."
+    },
+    {
+        "region": "North America",
+        "country": "USA",
+        "city": "Austin, TX",
+        "flag": "🇺🇸",
+        "sector_scores": {
+            "Data Science": {"demand": 95, "supply": 50},
+            "IoT": {"demand": 80, "supply": 55},
+            "Smart Grid": {"demand": 70, "supply": 60},
+            "Sustainability": {"demand": 75, "supply": 55},
+            "Software": {"demand": 90, "supply": 65}
+        },
+        "top_skills": ["Data Science", "Urban AI", "Machine Learning", "Software Development"],
+        "avg_salary_usd": 115000,
+        "cost_of_living_index": 80,
+        "remote_friendly": True,
+        "visa_ease": "Low",
+        "description": "Austin is North America's fastest growing hub for Urban AI and software-led city solutions."
+    },
+    {
+        "region": "South Asia",
+        "country": "India",
+        "city": "Bangalore",
+        "flag": "🇮🇳",
+        "sector_scores": {
+            "Data Science": {"demand": 90, "supply": 85},
+            "IoT": {"demand": 95, "supply": 80},
+            "Smart Grid": {"demand": 80, "supply": 70},
+            "Sustainability": {"demand": 75, "supply": 75},
+            "Software": {"demand": 98, "supply": 95}
+        },
+        "top_skills": ["Full Stack", "IoT", "Mobile Development", "Civic Tech", "Data Analysis"],
+        "avg_salary_usd": 35000,
+        "cost_of_living_index": 30,
+        "remote_friendly": True,
+        "visa_ease": "High",
+        "is_local": True,
+        "description": "The Silicon Valley of India, with peak demand for Software and IoT engineering."
+    },
+    {
+        "region": "South Asia",
+        "country": "India",
+        "city": "Mumbai",
+        "flag": "🇮🇳",
+        "sector_scores": {
+            "Data Science": {"demand": 95, "supply": 85},
+            "IoT": {"demand": 70, "supply": 75},
+            "Smart Grid": {"demand": 85, "supply": 75},
+            "Sustainability": {"demand": 90, "supply": 65},
+            "Software": {"demand": 85, "supply": 90}
+        },
+        "top_skills": ["Fintech", "Data Analytics", "ESG Reporting", "Public Policy", "Sustainability"],
+        "avg_salary_usd": 38000,
+        "cost_of_living_index": 45,
+        "remote_friendly": True,
+        "visa_ease": "High",
+        "is_local": True,
+        "description": "India's financial capital with burgeoning demand for ESG and Sustainability analysts."
+    },
+    {
+        "region": "South Asia",
+        "country": "India",
+        "city": "Hyderabad",
+        "flag": "🇮🇳",
+        "sector_scores": {
+            "Data Science": {"demand": 92, "supply": 80},
+            "IoT": {"demand": 85, "supply": 75},
+            "Smart Grid": {"demand": 75, "supply": 80},
+            "Sustainability": {"demand": 70, "supply": 80},
+            "Software": {"demand": 95, "supply": 85}
+        },
+        "top_skills": ["Cloud Computing", "AI/ML", "Backend Engineering", "IoT", "Pharma Tech"],
+        "avg_salary_usd": 32000,
+        "cost_of_living_index": 28,
+        "remote_friendly": True,
+        "visa_ease": "High",
+        "is_local": True,
+        "description": "A massive hub for Cloud and AI, offering high value with a lower cost of living."
+    },
+    {
+        "region": "South Asia",
+        "country": "India",
+        "city": "Pune",
+        "flag": "🇮🇳",
+        "sector_scores": {
+            "Data Science": {"demand": 80, "supply": 75},
+            "IoT": {"demand": 92, "supply": 70},
+            "Smart Grid": {"demand": 95, "supply": 65},
+            "Sustainability": {"demand": 85, "supply": 75},
+            "Software": {"demand": 85, "supply": 85}
+        },
+        "top_skills": ["Automotive Tech", "Smart Grid", "Embedded Systems", "EV Engineering", "Manufacturing"],
+        "avg_salary_usd": 30000,
+        "cost_of_living_index": 25,
+        "remote_friendly": True,
+        "visa_ease": "High",
+        "is_local": True,
+        "description": "The R&D capital for Smart Grids and EV infrastructure in India."
+    }
+]
+
+def calculate_skill_arbitrage(user_skills: set, region_data: dict) -> dict:
+    """Highly dynamic scoring based on user's specific skill sectors"""
+    
+    # Fuzzy match user skills against sectors
+    user_str = " ".join(user_skills).lower()
+    
+    sector_keywords = {
+        "Data Science": ["python", "machine learning", "data science", "statistics", "data analysis", "ai", "sql", "tensorflow", "pytorch"],
+        "IoT": ["iot", "sensors", "embedded", "networking", "hardware", "mqtt", "arduino", "raspberry pi", "smart city"],
+        "Smart Grid": ["energy", "smart grid", "power", "electrical", "grid", "renewable", "solar", "wind"],
+        "Sustainability": ["sustainability", "environment", "climate", "carbon", "green", "renewable", "esg", "ecology"],
+        "Software": ["javascript", "web", "react", "node.js", "api", "software", "programming", "developer", "full stack"]
+    }
+    
+    # Calculate sector relevance scores
+    sector_relevance = {}
+    for sector, keywords in sector_keywords.items():
+        count = sum(1 for kw in keywords if kw in user_str)
+        if count > 0:
+            sector_relevance[sector] = count
+
+    # Find active sectors for the user
+    user_sectors = list(sector_relevance.keys())
+    
+    if not sector_relevance:
+        # Fallback to general averages if nothing detected
+        avg_demand = sum(s["demand"] for s in region_data["sector_scores"].values()) / len(region_data["sector_scores"])
+        avg_supply = sum(s["supply"] for s in region_data["sector_scores"].values()) / len(region_data["sector_scores"])
+        dominant_sector = "General Technology"
+    else:
+        # Weight demand/supply based on relevance (strongest sector counts most)
+        top_sector = max(sector_relevance, key=sector_relevance.get)
+        dominant_sector = top_sector
+        
+        # Calculate weighted averages
+        total_weight = sum(sector_relevance.values())
+        avg_demand = sum(region_data["sector_scores"][s]["demand"] * (sector_relevance[s] / total_weight) for s in user_sectors)
+        avg_supply = sum(region_data["sector_scores"][s]["supply"] * (sector_relevance[s] / total_weight) for s in user_sectors)
+
+    # Core Arbitrage Formula: (Market Tightness^1.5) * (Economic Value)
+    # Raising tightness to power of 1.5 amplifies the demand/supply gap over the salary baseline
+    market_tightness = (avg_demand / avg_supply) ** 1.5
+    economic_value = region_data["avg_salary_usd"] / (region_data["cost_of_living_index"] * 500)
+    
+    arbitrage_score = market_tightness * economic_value
+    
+    # Matching Skill Bonus (Flagship Skills)
+    relevant_overlap = [s for s in region_data["top_skills"] if any(s.lower() in us.lower() for us in user_skills)]
+    skill_multiplier = 1.0 + (len(relevant_overlap) * 0.12)
+    arbitrage_score *= skill_multiplier
+    
+    # Remote bonus
+    if region_data["remote_friendly"]:
+        arbitrage_score *= 1.15
+        
+    return {
+        "score": round(arbitrage_score, 2),
+        "dominant_sector": dominant_sector,
+        "avg_demand": round(avg_demand, 1)
+    }
+
 def calculate_match_score(user_skills: set, required_skills: list) -> float:
     """Standardized scoring algorithm for all features"""
     if not required_skills:
@@ -349,6 +571,66 @@ async def get_career_paths():
         "skills_detected": list(current_session["resume_data"].get("skills", [])),
         "career_paths": career_paths,
         "total_paths": len(career_paths)
+    }
+
+
+@app.get("/skill-arbitrage")
+async def get_skill_arbitrage():
+    """Get global skill arbitrage opportunities based on user profile"""
+    
+    if not current_session["resume_data"]:
+        raise HTTPException(status_code=400, detail="No resume uploaded. Please upload a resume first.")
+    
+    user_skills = set(skill.lower() for skill in current_session["resume_data"].get("skills", []))
+    
+    opportunities = []
+    local_market = None
+    
+    for region in REGIONAL_DEMAND_DATA:
+        result = calculate_skill_arbitrage(user_skills, region)
+        arbitrage_score = result["score"]
+        
+        # Calculate a "Value Multiplier" for UI (e.g. 2.4x)
+        value_multiplier = round(arbitrage_score / 1.5, 1)
+        
+        opp = {
+            "region": region["region"],
+            "country": region["country"],
+            "city": region.get("city", ""),
+            "flag": region["flag"],
+            "value_index": arbitrage_score,
+            "value_multiplier": f"{value_multiplier}x",
+            "demand": "High" if result["avg_demand"] > 80 else "Medium",
+            "salary_usd": region["avg_salary_usd"],
+            "col_index": region["cost_of_living_index"],
+            "remote_friendly": region["remote_friendly"],
+            "visa_ease": region["visa_ease"],
+            "description": region["description"],
+            "dominant_sector": result["dominant_sector"],
+            "is_local": region.get("is_local", False),
+            "top_matching_skills": [s for s in region["top_skills"] if any(s.lower() in us.lower() for us in user_skills)]
+        }
+        
+        if opp["is_local"]:
+            local_market = opp
+            
+        opportunities.append(opp)
+        
+    # Sort by value index
+    opportunities.sort(key=lambda x: x["value_index"], reverse=True)
+    
+    # Identify local market (India) - Pick the best match for the user among local options
+    local_options = [o for o in opportunities if o["is_local"]]
+    local_market = local_options[0] if local_options else None
+    
+    # Global opportunities (excluding local)
+    global_opps = [o for o in opportunities if not o["is_local"]]
+    
+    return {
+        "opportunities": global_opps,
+        "local_market": local_market,
+        "user_best_fit": global_opps[0]["country"] if global_opps else "N/A",
+        "total_regions": len(opportunities)
     }
 
 

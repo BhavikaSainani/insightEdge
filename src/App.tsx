@@ -17,6 +17,7 @@ import News from "./pages/News";
 import Article from "./pages/Article";
 import About from "./pages/About";
 import ChatBot from "./pages/ChatBot";
+import GlobalOpportunities from "./pages/GlobalOpportunities";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,7 @@ const App = () => (
                 <Route path="/news/:id" element={<Article />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/chatbot" element={<ChatBot />} />
+                <Route path="/global-opportunities" element={<GlobalOpportunities />} />
               </Route>
             </Route>
 

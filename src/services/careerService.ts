@@ -83,6 +83,31 @@ export interface ChatResponse {
     rag_used: boolean;
 }
 
+export interface ArbitrageOpportunity {
+    region: string;
+    country: string;
+    city: string;
+    flag: string;
+    value_index: number;
+    value_multiplier: string;
+    demand: string;
+    salary_usd: number;
+    col_index: number;
+    remote_friendly: boolean;
+    visa_ease: string;
+    description: string;
+    dominant_sector: string;
+    is_local: boolean;
+    top_matching_skills: string[];
+}
+
+export interface SkillArbitrageResponse {
+    opportunities: ArbitrageOpportunity[];
+    local_market: ArbitrageOpportunity;
+    user_best_fit: string;
+    total_regions: number;
+}
+
 export interface HealthCheck {
     status: string;
     service: string;
@@ -194,6 +219,18 @@ export async function sendChatMessage(question: string): Promise<ChatResponse> {
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.detail || 'Failed to get chat response');
+    }
+
+    return await response.json();
+}
+
+// Get global skill arbitrage opportunities
+export async function getSkillArbitrage(): Promise<SkillArbitrageResponse> {
+    const response = await fetch(`${CAREER_API_URL}/skill-arbitrage`);
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to get skill arbitrage data');
     }
 
     return await response.json();

@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/AuthContext";
 
-import { Menu, X, Leaf, FileText, Target, TrendingUp, Map, Info, Newspaper, MessageSquare, LogOut } from "lucide-react";
+import { Menu, X, Leaf, FileText, Target, TrendingUp, Map, Info, Newspaper, MessageSquare, LogOut, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
@@ -12,6 +12,7 @@ const navLinks = [
   { name: "Career Match", path: "/career-match", icon: Target },
   { name: "Skill Gap", path: "/skill-gap", icon: TrendingUp },
   { name: "Roadmap", path: "/roadmap", icon: Map },
+  { name: "Global Marketplace", path: "/global-opportunities", icon: Globe },
   { name: "News & Insights", path: "/news", icon: Newspaper },
   { name: "ChatBot", path: "/chatbot", icon: MessageSquare },
   { name: "About", path: "/about", icon: Info },
