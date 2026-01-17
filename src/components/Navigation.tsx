@@ -1,11 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-<<<<<<< HEAD
-import { Menu, X, Leaf, FileText, Target, TrendingUp, Map, Info, MessageSquare, ThumbsUp } from "lucide-react";
-=======
-import { Menu, X, Leaf, FileText, Target, TrendingUp, Map, Info, Newspaper } from "lucide-react";
->>>>>>> d55d0b0a6dce3cedcdc2ded7409ae2bfd4a2f3f9
+import { Menu, X, Leaf, FileText, Target, TrendingUp, Map, Info, MessageSquare, ThumbsUp, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
@@ -14,12 +10,9 @@ const navLinks = [
   { name: "Career Match", path: "/career-match", icon: Target },
   { name: "Skill Gap", path: "/skill-gap", icon: TrendingUp },
   { name: "Roadmap", path: "/roadmap", icon: Map },
-<<<<<<< HEAD
+  { name: "News & Insights", path: "/news", icon: Newspaper },
   { name: "Sentiment", path: "/sentiment", icon: ThumbsUp },
   { name: "ChatBot", path: "/chatbot", icon: MessageSquare },
-=======
-  { name: "News & Insights", path: "/news", icon: Newspaper },
->>>>>>> d55d0b0a6dce3cedcdc2ded7409ae2bfd4a2f3f9
   { name: "About", path: "/about", icon: Info },
 ];
 
