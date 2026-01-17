@@ -411,6 +411,8 @@ async def upload_resume(file: UploadFile = File(...)):
             "quality": quality
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error processing resume: {e}")
         raise HTTPException(status_code=500, detail=str(e))
