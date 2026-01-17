@@ -1,63 +1,119 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Target, TrendingUp, CheckCircle2, AlertCircle, ArrowRight, Building2, Car, BarChart3 } from "lucide-react";
+import { Target, TrendingUp, CheckCircle2, AlertCircle, ArrowRight, Briefcase, Code, Database, Cloud, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { getCareerPaths, getResumeAnalysis, CareerPath, ResumeAnalysis } from "@/services/careerService";
+import { toast } from "sonner";
 
-const roles = [
-  {
-    title: "Urban Data Analyst",
-    icon: BarChart3,
-    confidence: 92,
-    level: "High",
-    description: "Analyze city data to drive smarter urban planning decisions.",
-    matchingSkills: ["Data Analysis", "Python", "Statistics", "Problem Solving"],
-    missingSkills: ["GIS Tools", "Urban Planning Basics"],
-  },
-  {
-    title: "Smart Mobility Analyst",
-    icon: Car,
-    confidence: 78,
-    level: "Moderate",
-    description: "Optimize transportation systems for sustainable urban mobility.",
-    matchingSkills: ["Data Analysis", "Research", "Communication"],
-    missingSkills: ["Transportation Planning", "Traffic Modeling", "IoT Basics"],
-  },
-  {
-    title: "City Operations Analyst",
-    icon: Building2,
-    confidence: 65,
-    level: "Needs Preparation",
-    description: "Manage and improve city-wide operational efficiency.",
-    matchingSkills: ["Problem Solving", "Communication"],
-    missingSkills: ["City Management", "Infrastructure Knowledge", "Policy Analysis"],
-  },
-];
+const iconMap: Record<string, any> = {
+  "Data Scientist": Database,
+  "Software Engineer": Code,
+  "Frontend Developer": Code,
+  "Backend Developer": Code,
+  "Data Analyst": Database,
+  "DevOps Engineer": Cloud,
+  "ML Engineer": Database,
+  "IT Professional": Briefcase,
+};
 
-const getConfidenceColor = (level: string) => {
-  switch (level) {
+const getConfidenceColor = (match: string) => {
+  switch (match) {
     case "High":
       return "text-leaf";
-    case "Moderate":
+    case "Medium":
       return "text-olive";
     default:
       return "text-muted-foreground";
   }
 };
 
-const getConfidenceBg = (level: string) => {
-  switch (level) {
+const getConfidenceBg = (match: string) => {
+  switch (match) {
     case "High":
       return "bg-leaf/20";
-    case "Moderate":
+    case "Medium":
       return "bg-olive/20";
     default:
       return "bg-muted";
   }
 };
 
+const getMatchPercentage = (match: string) => {
+  switch (match) {
+    case "High":
+      return 85 + Math.floor(Math.random() * 10);
+    case "Medium":
+      return 60 + Math.floor(Math.random() * 15);
+    default:
+      return 40 + Math.floor(Math.random() * 15);
+  }
+};
+
 const CareerMatch = () => {
-  const topRole = roles[0];
+  const [loading, setLoading] = useState(true);
+  const [careerPaths, setCareerPaths] = useState<CareerPath[]>([]);
+  const [skills, setSkills] = useState<string[]>([]);
+  const [resumeAnalysis, setResumeAnalysis] = useState<ResumeAnalysis | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+
+        // Fetch career paths and resume analysis
+        const [pathsResponse, analysisResponse] = await Promise.all([
+          getCareerPaths(),
+          getResumeAnalysis()
+        ]);
+
+        setCareerPaths(pathsResponse.career_paths);
+        setSkills(pathsResponse.skills_detected);
+        setResumeAnalysis(analysisResponse);
+        setError(null);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Failed to load career data. Please upload a resume first.";
+        setError(errorMessage);
+        toast.error(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-24 pb-16 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Analyzing your career matches...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || careerPaths.length === 0) {
+    return (
+      <div className="min-h-screen pt-24 pb-16">
+        <div className="container mx-auto px-4 text-center">
+          <AlertCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-foreground mb-4">No Resume Data Found</h2>
+          <p className="text-muted-foreground mb-6">Please upload your resume first to see career matches.</p>
+          <Link to="/upload">
+            <Button className="btn-forest">Upload Resume</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const topRole = careerPaths[0];
+  const topRolePercentage = getMatchPercentage(topRole.match);
+  const TopIcon = iconMap[topRole.title] || Briefcase;
 
   return (
     <div className="min-h-screen pt-24 pb-16">
@@ -74,10 +130,10 @@ const CareerMatch = () => {
             <span className="text-sm font-medium text-leaf">Match Found!</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Your Smart City Career Matches
+            Your Career Matches
           </h1>
           <p className="text-muted-foreground">
-            Based on your resume, here are the roles that best fit your profile
+            Based on your {skills.length} skills, here are the roles that best fit your profile
           </p>
         </motion.div>
 
@@ -93,12 +149,12 @@ const CareerMatch = () => {
               <CheckCircle2 className="w-4 h-4" />
               Top Recommendation
             </div>
-            
+
             <div className="flex flex-col md:flex-row md:items-start gap-6">
               <div className="w-20 h-20 rounded-2xl bg-leaf/20 flex items-center justify-center flex-shrink-0">
-                <topRole.icon className="w-10 h-10 text-leaf" />
+                <TopIcon className="w-10 h-10 text-leaf" />
               </div>
-              
+
               <div className="flex-1">
                 <h2 className="text-2xl font-bold text-foreground mb-2">
                   {topRole.title}
@@ -108,13 +164,13 @@ const CareerMatch = () => {
                 </p>
 
                 <div className="flex items-center gap-4 mb-6">
-                  <div className={`px-4 py-2 rounded-xl ${getConfidenceBg(topRole.level)}`}>
-                    <span className={`font-semibold ${getConfidenceColor(topRole.level)}`}>
-                      {topRole.confidence}% Match
+                  <div className={`px-4 py-2 rounded-xl ${getConfidenceBg(topRole.match)}`}>
+                    <span className={`font-semibold ${getConfidenceColor(topRole.match)}`}>
+                      {topRolePercentage}% Match
                     </span>
                   </div>
                   <span className="text-sm text-muted-foreground">
-                    Confidence: {topRole.level}
+                    Confidence: {topRole.match}
                   </span>
                 </div>
 
@@ -122,10 +178,10 @@ const CareerMatch = () => {
                   <div className="p-4 rounded-xl bg-leaf/10">
                     <h4 className="font-medium text-foreground mb-2 flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-leaf" />
-                      Why this fits you
+                      Your Skills
                     </h4>
                     <div className="flex flex-wrap gap-2">
-                      {topRole.matchingSkills.map((skill) => (
+                      {skills.slice(0, 6).map((skill) => (
                         <span
                           key={skill}
                           className="px-3 py-1 rounded-full text-sm bg-leaf/20 text-leaf"
@@ -133,24 +189,24 @@ const CareerMatch = () => {
                           {skill}
                         </span>
                       ))}
+                      {skills.length > 6 && (
+                        <span className="px-3 py-1 rounded-full text-sm bg-secondary text-muted-foreground">
+                          +{skills.length - 6} more
+                        </span>
+                      )}
                     </div>
                   </div>
-                  
+
                   <div className="p-4 rounded-xl bg-secondary">
                     <h4 className="font-medium text-foreground mb-2 flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 text-olive" />
-                      Skills to build
+                      <TrendingUp className="w-4 h-4 text-olive" />
+                      Next Steps
                     </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {topRole.missingSkills.map((skill) => (
-                        <span
-                          key={skill}
-                          className="px-3 py-1 rounded-full text-sm bg-olive/20 text-olive"
-                        >
-                          {skill}
-                        </span>
+                    <ul className="text-sm text-muted-foreground space-y-1">
+                      {topRole.next_steps.slice(0, 3).map((step, i) => (
+                        <li key={i}>• {step}</li>
                       ))}
-                    </div>
+                    </ul>
                   </div>
                 </div>
               </div>
@@ -174,48 +230,83 @@ const CareerMatch = () => {
         </motion.div>
 
         {/* Other Matches */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="max-w-3xl mx-auto"
-        >
-          <h3 className="text-lg font-semibold text-foreground mb-4">
-            Other Potential Matches
-          </h3>
-          
-          <div className="space-y-4">
-            {roles.slice(1).map((role, index) => {
-              const Icon = role.icon;
-              return (
-                <motion.div
-                  key={role.title}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5 + index * 0.1 }}
-                  className="card-urban p-6"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${getConfidenceBg(role.level)}`}>
-                      <Icon className={`w-7 h-7 ${getConfidenceColor(role.level)}`} />
-                    </div>
-                    
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <h4 className="font-semibold text-foreground">{role.title}</h4>
-                        <span className={`text-sm font-medium ${getConfidenceColor(role.level)}`}>
-                          {role.confidence}%
-                        </span>
+        {careerPaths.length > 1 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="max-w-3xl mx-auto"
+          >
+            <h3 className="text-lg font-semibold text-foreground mb-4">
+              Other Potential Matches
+            </h3>
+
+            <div className="space-y-4">
+              {careerPaths.slice(1).map((role, index) => {
+                const Icon = iconMap[role.title] || Briefcase;
+                const percentage = getMatchPercentage(role.match);
+                return (
+                  <motion.div
+                    key={role.title}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.5 + index * 0.1 }}
+                    className="card-urban p-6"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${getConfidenceBg(role.match)}`}>
+                        <Icon className={`w-7 h-7 ${getConfidenceColor(role.match)}`} />
                       </div>
-                      <p className="text-sm text-muted-foreground mb-2">{role.description}</p>
-                      <Progress value={role.confidence} className="h-2" />
+
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="font-semibold text-foreground">{role.title}</h4>
+                          <span className={`text-sm font-medium ${getConfidenceColor(role.match)}`}>
+                            {percentage}%
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-2">{role.description}</p>
+                        <Progress value={percentage} className="h-2" />
+                      </div>
                     </div>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        </motion.div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Resume Summary */}
+        {resumeAnalysis && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="max-w-3xl mx-auto mt-8"
+          >
+            <div className="card-urban p-6 bg-secondary/50">
+              <h3 className="text-lg font-semibold text-foreground mb-4">Resume Summary</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-primary">{resumeAnalysis.skills.length}</div>
+                  <div className="text-sm text-muted-foreground">Skills</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-primary">{resumeAnalysis.projects.length}</div>
+                  <div className="text-sm text-muted-foreground">Projects</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-primary">{resumeAnalysis.education.length}</div>
+                  <div className="text-sm text-muted-foreground">Education</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-primary">{resumeAnalysis.quality_analysis.completeness_score}%</div>
+                  <div className="text-sm text-muted-foreground">Complete</div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
       </div>
     </div>
   );

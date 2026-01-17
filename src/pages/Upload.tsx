@@ -1,8 +1,10 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Upload as UploadIcon, FileText, CheckCircle2, Loader2, Sparkles, Brain, Target } from "lucide-react";
+import { Upload as UploadIcon, FileText, CheckCircle2, Loader2, Sparkles, Brain, Target, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { uploadResume } from "@/services/careerService";
+import { toast } from "sonner";
 
 const steps = [
   { icon: FileText, label: "Parsing Resume", description: "Reading your experience" },
@@ -15,7 +17,9 @@ const Upload = () => {
   const [file, setFile] = useState<File | null>(null);
   const [currentStep, setCurrentStep] = useState(-1);
   const [isComplete, setIsComplete] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -43,20 +47,37 @@ const Upload = () => {
     }
   };
 
-  const processFile = (uploadedFile: File) => {
+  const processFile = async (uploadedFile: File) => {
     setFile(uploadedFile);
-    simulateProcessing();
+    setError(null);
+    setCurrentStep(0);
+
+    try {
+      // Step 1: Parsing Resume
+      const response = await uploadResume(uploadedFile);
+      setCurrentStep(1);
+
+      // Step 2: Understanding Skills (brief delay for UX)
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      setCurrentStep(2);
+
+      // Step 3: Matching Roles
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      setIsComplete(true);
+      toast.success(`Found ${response.skills_found} skills and ${response.projects_found} projects!`);
+
+      // Navigate to career match page
+      setTimeout(() => navigate("/career-match"), 1000);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to process resume. Make sure the Career API is running.";
+      setError(errorMessage);
+      setCurrentStep(-1);
+      setFile(null);
+      toast.error(errorMessage);
+    }
   };
 
-  const simulateProcessing = () => {
-    setCurrentStep(0);
-    setTimeout(() => setCurrentStep(1), 1500);
-    setTimeout(() => setCurrentStep(2), 3000);
-    setTimeout(() => {
-      setIsComplete(true);
-      setTimeout(() => navigate("/career-match"), 1000);
-    }, 4500);
-  };
 
   return (
     <div className="min-h-screen pt-24 pb-16">
@@ -90,11 +111,10 @@ const Upload = () => {
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`card-urban p-12 text-center border-2 border-dashed transition-all duration-300 ${
-                isDragging
-                  ? "border-primary bg-secondary/50 scale-[1.02]"
-                  : "border-border hover:border-primary/50"
-              }`}
+              className={`card-urban p-12 text-center border-2 border-dashed transition-all duration-300 ${isDragging
+                ? "border-primary bg-secondary/50 scale-[1.02]"
+                : "border-border hover:border-primary/50"
+                }`}
             >
               <motion.div
                 animate={isDragging ? { scale: 1.1, y: -5 } : { scale: 1, y: 0 }}
@@ -102,28 +122,31 @@ const Upload = () => {
               >
                 <UploadIcon className="w-10 h-10 text-primary" />
               </motion.div>
-              
+
               <h3 className="text-xl font-semibold text-foreground mb-2">
                 Drag & drop your resume here
               </h3>
               <p className="text-muted-foreground mb-6">
                 or click to browse files
               </p>
-              
-              <label className="cursor-pointer">
-                <input
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
-                <Button className="btn-forest">
-                  Choose File
-                </Button>
-              </label>
-              
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf"
+                onChange={handleFileSelect}
+                style={{ display: 'none' }}
+              />
+              <Button
+                type="button"
+                className="btn-forest"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Choose File
+              </Button>
+
               <p className="text-xs text-muted-foreground mt-4">
-                Supports PDF, DOC, DOCX (Max 5MB)
+                Supports PDF (Max 5MB)
               </p>
             </div>
           ) : (
@@ -154,29 +177,27 @@ const Upload = () => {
                   const Icon = step.icon;
                   const isActive = currentStep === index;
                   const isCompleted = currentStep > index;
-                  
+
                   return (
                     <motion.div
                       key={step.label}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.2 }}
-                      className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-300 ${
-                        isActive
-                          ? "bg-secondary"
-                          : isCompleted
+                      className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-300 ${isActive
+                        ? "bg-secondary"
+                        : isCompleted
                           ? "bg-leaf/10"
                           : "bg-muted/50"
-                      }`}
+                        }`}
                     >
                       <div
-                        className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
-                          isActive
-                            ? "bg-primary text-primary-foreground"
-                            : isCompleted
+                        className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${isActive
+                          ? "bg-primary text-primary-foreground"
+                          : isCompleted
                             ? "bg-leaf text-primary-foreground"
                             : "bg-muted text-muted-foreground"
-                        }`}
+                          }`}
                       >
                         {isActive ? (
                           <Loader2 className="w-6 h-6 animate-spin" />
