@@ -3,7 +3,7 @@
  * Communicates with the FastAPI Career Advisor backend
  */
 
-const CAREER_API_URL = 'http://localhost:8001';
+const CAREER_API_URL = '/api';
 
 export interface ResumeUploadResponse {
     success: boolean;

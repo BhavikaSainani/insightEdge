@@ -45,6 +45,8 @@ const Upload = () => {
     if (selectedFile) {
       processFile(selectedFile);
     }
+    // Reset input so the same file can be selected again if needed
+    e.target.value = '';
   };
 
   const processFile = async (uploadedFile: File) => {
