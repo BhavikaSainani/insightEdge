@@ -2,7 +2,7 @@
 // This file prepares Firebase for future features like authentication and database
 
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -20,4 +20,5 @@ const app = firebaseConfig.apiKey ? initializeApp(firebaseConfig) : null;
 // Export services for future use
 export const auth = app ? getAuth(app) : null;
 export const db = app ? getFirestore(app) : null;
+export const googleProvider = app ? new GoogleAuthProvider() : null;
 export default app;

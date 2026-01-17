@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/lib/AuthContext";
 
-import { Menu, X, Leaf, FileText, Target, TrendingUp, Map, Info, Newspaper, MessageSquare } from "lucide-react";
+import { Menu, X, Leaf, FileText, Target, TrendingUp, Map, Info, Newspaper, MessageSquare, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
@@ -19,6 +20,17 @@ const navLinks = [
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/auth");
+    } catch (error) {
+      console.error("Failed to logout", error);
+    }
+  };
 
   return (
     <motion.nav
@@ -61,11 +73,16 @@ export const Navigation = () => {
             })}
           </div>
 
-          {/* CTA Button */}
+          {/* CTA / Logout Button */}
           <div className="hidden md:block">
-            <Link to="/upload">
-              <Button className="btn-forest">Get Started</Button>
-            </Link>
+            <Button
+              onClick={handleLogout}
+              variant="destructive"
+              className="gap-2"
+            >
+              <LogOut className="w-4 h-4" />
+              Log Out
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -111,9 +128,18 @@ export const Navigation = () => {
                   </Link>
                 );
               })}
-              <Link to="/upload" onClick={() => setIsOpen(false)}>
-                <Button className="btn-forest w-full mt-4">Get Started</Button>
-              </Link>
+
+              <Button
+                onClick={() => {
+                  handleLogout();
+                  setIsOpen(false);
+                }}
+                variant="destructive"
+                className="w-full mt-4 gap-2"
+              >
+                <LogOut className="w-4 h-4" />
+                Log Out
+              </Button>
             </div>
           </motion.div>
         )}
