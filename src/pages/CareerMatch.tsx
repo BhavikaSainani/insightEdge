@@ -40,17 +40,6 @@ const getConfidenceBg = (match: string) => {
   }
 };
 
-const getMatchPercentage = (match: string) => {
-  switch (match) {
-    case "High":
-      return 85 + Math.floor(Math.random() * 10);
-    case "Medium":
-      return 60 + Math.floor(Math.random() * 15);
-    default:
-      return 40 + Math.floor(Math.random() * 15);
-  }
-};
-
 const CareerMatch = () => {
   const [loading, setLoading] = useState(true);
   const [careerPaths, setCareerPaths] = useState<CareerPath[]>([]);
@@ -112,7 +101,7 @@ const CareerMatch = () => {
   }
 
   const topRole = careerPaths[0];
-  const topRolePercentage = getMatchPercentage(topRole.match);
+  const topRolePercentage = topRole.match_score;
   const TopIcon = iconMap[topRole.title] || Briefcase;
 
   return (
@@ -244,7 +233,7 @@ const CareerMatch = () => {
             <div className="space-y-4">
               {careerPaths.slice(1).map((role, index) => {
                 const Icon = iconMap[role.title] || Briefcase;
-                const percentage = getMatchPercentage(role.match);
+                const percentage = role.match_score;
                 return (
                   <motion.div
                     key={role.title}

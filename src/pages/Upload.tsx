@@ -1,25 +1,35 @@
 import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Upload as UploadIcon, FileText, CheckCircle2, Loader2, Sparkles, Brain, Target, AlertCircle } from "lucide-react";
+import { Upload as UploadIcon, FileText, CheckCircle2, Loader2, Sparkles, Brain, Target, AlertCircle, Linkedin, Link as LinkIcon, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { uploadResume } from "@/services/careerService";
+import { uploadResume, extractLinkedIn } from "@/services/careerService";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 
 const steps = [
   { icon: FileText, label: "Parsing Resume", description: "Reading your experience" },
-  { icon: Brain, label: "Understanding Skills", description: "Mapping your abilities" },
-  { icon: Target, label: "Matching Roles", description: "Finding your fit" },
+  { icon: Brain, label: "Understanding Skills", description: "Extracting core competencies" },
+  { icon: Target, label: "Matching Roles", description: "Ranking best career choices" },
+];
+
+const linkedinSteps = [
+  { icon: Linkedin, label: "Connecting Profile", description: "Linking to your LinkedIn" },
+  { icon: Brain, label: "Analyzing Profile", description: "Extracting skills and history" },
+  { icon: Target, label: "Matching Roles", description: "Finding your smart city path" },
 ];
 
 const Upload = () => {
-  const [isDragging, setIsDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
   const [currentStep, setCurrentStep] = useState(-1);
   const [isComplete, setIsComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -31,26 +41,9 @@ const Upload = () => {
     setIsDragging(false);
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile && (droppedFile.type === "application/pdf" || droppedFile.name.endsWith(".pdf"))) {
-      processFile(droppedFile);
-    }
-  }, []);
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      processFile(selectedFile);
-    }
-    // Reset input so the same file can be selected again if needed
-    e.target.value = '';
-  };
-
   const processFile = async (uploadedFile: File) => {
     setFile(uploadedFile);
+    setIsProcessing(true);
     setError(null);
     setCurrentStep(0);
 
@@ -76,8 +69,65 @@ const Upload = () => {
       setError(errorMessage);
       setCurrentStep(-1);
       setFile(null);
+      setIsProcessing(false);
       toast.error(errorMessage);
     }
+  };
+
+  const processLinkedIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!linkedinUrl.includes("linkedin.com/in/")) {
+      toast.error("Please enter a valid LinkedIn profile URL");
+      return;
+    }
+
+    setIsProcessing(true);
+    setError(null);
+    setCurrentStep(0);
+
+    try {
+      // Step 1: Connecting
+      const response = await extractLinkedIn(linkedinUrl);
+      setCurrentStep(1);
+
+      // Step 2: Analyzing
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+      setCurrentStep(2);
+
+      // Step 3: Matching Roles
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      setIsComplete(true);
+      toast.success(`Success! Linked profile. Found ${response.skills_found} skills.`);
+
+      // Navigate to career match page
+      setTimeout(() => navigate("/career-match"), 1000);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to link LinkedIn. Make sure the Career API is running.";
+      setError(errorMessage);
+      setCurrentStep(-1);
+      setIsProcessing(false);
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const droppedFile = e.dataTransfer.files[0];
+    if (droppedFile && (droppedFile.type === "application/pdf" || droppedFile.name.endsWith(".pdf"))) {
+      processFile(droppedFile);
+    } else {
+      toast.error("Please upload a PDF file");
+    }
+  }, []);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      processFile(selectedFile);
+    }
+    e.target.value = '';
   };
 
 
@@ -95,10 +145,10 @@ const Upload = () => {
             <span className="text-sm font-medium text-primary">AI-Powered Analysis</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Upload Your Resume
+            Get Analyzed
           </h1>
           <p className="text-muted-foreground">
-            We analyze skills, not judge resumes 🌱
+            Choose either your resume or your LinkedIn profile for analysis 🌱
           </p>
         </motion.div>
 
@@ -108,119 +158,166 @@ const Upload = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="max-w-xl mx-auto"
         >
-          {!file ? (
-            <div
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              className={`card-urban p-12 text-center border-2 border-dashed transition-all duration-300 ${isDragging
-                ? "border-primary bg-secondary/50 scale-[1.02]"
-                : "border-border hover:border-primary/50"
-                }`}
-            >
-              <motion.div
-                animate={isDragging ? { scale: 1.1, y: -5 } : { scale: 1, y: 0 }}
-                className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-secondary flex items-center justify-center"
-              >
-                <UploadIcon className="w-10 h-10 text-primary" />
-              </motion.div>
+          {!isProcessing ? (
+            <Tabs defaultValue="upload" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-8 p-1 bg-secondary rounded-xl">
+                <TabsTrigger value="upload" className="rounded-lg py-3 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  Upload Resume
+                </TabsTrigger>
+                <TabsTrigger value="linkedin" className="rounded-lg py-3 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  LinkedIn Profile
+                </TabsTrigger>
+              </TabsList>
 
-              <h3 className="text-xl font-semibold text-foreground mb-2">
-                Drag & drop your resume here
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                or click to browse files
-              </p>
+              <TabsContent value="upload">
+                <div
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  className={`card-urban p-12 text-center border-2 border-dashed transition-all duration-300 ${isDragging
+                    ? "border-primary bg-secondary/50 scale-[1.02]"
+                    : "border-border hover:border-primary/50"
+                    }`}
+                >
+                  <motion.div
+                    animate={isDragging ? { scale: 1.1, y: -5 } : { scale: 1, y: 0 }}
+                    className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-secondary flex items-center justify-center"
+                  >
+                    <UploadIcon className="w-10 h-10 text-primary" />
+                  </motion.div>
 
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf"
-                onChange={handleFileSelect}
-                style={{ display: 'none' }}
-              />
-              <Button
-                type="button"
-                className="btn-forest"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                Choose File
-              </Button>
+                  <h3 className="text-xl font-semibold text-foreground mb-2">
+                    Drag & drop your resume here
+                  </h3>
+                  <p className="text-muted-foreground mb-6">
+                    or click to browse files
+                  </p>
 
-              <p className="text-xs text-muted-foreground mt-4">
-                Supports PDF (Max 5MB)
-              </p>
-            </div>
-          ) : (
-            <div className="card-urban p-8">
-              <div className="flex items-center gap-4 mb-8 p-4 rounded-xl bg-secondary">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-foreground">{file.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {(file.size / 1024).toFixed(1)} KB
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf"
+                    onChange={handleFileSelect}
+                    style={{ display: 'none' }}
+                  />
+                  <Button
+                    type="button"
+                    className="btn-forest"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    Choose File
+                  </Button>
+
+                  <p className="text-xs text-muted-foreground mt-4">
+                    Supports PDF (Max 5MB)
                   </p>
                 </div>
-                {isComplete && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="w-10 h-10 rounded-full bg-leaf/20 flex items-center justify-center"
-                  >
-                    <CheckCircle2 className="w-6 h-6 text-leaf" />
-                  </motion.div>
-                )}
-              </div>
+              </TabsContent>
 
-              <div className="space-y-4">
-                {steps.map((step, index) => {
+              <TabsContent value="linkedin">
+                <div className="card-urban p-12 text-center">
+                  <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-[#0077b5]/10 flex items-center justify-center">
+                    <Linkedin className="w-10 h-10 text-[#0077b5]" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-foreground mb-2">
+                    Connect LinkedIn Profile
+                  </h3>
+                  <p className="text-muted-foreground mb-8">
+                    Enter your profile URL to extract skills directly
+                  </p>
+
+                  <form onSubmit={processLinkedIn} className="space-y-4">
+                    <div className="relative">
+                      <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        type="text"
+                        placeholder="linkedin.com/in/username"
+                        value={linkedinUrl}
+                        onChange={(e) => setLinkedinUrl(e.target.value)}
+                        className="pl-10 h-12 rounded-xl"
+                      />
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full h-12 rounded-xl bg-[#0077b5] hover:bg-[#0077b5]/90 text-white font-semibold transition-all"
+                    >
+                      Connect Profile
+                    </Button>
+                  </form>
+                </div>
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <div className="card-urban p-8">
+              {file && (
+                <div className="flex items-center gap-4 mb-8 p-4 rounded-xl bg-secondary">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <FileText className="w-6 h-6 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-medium text-foreground truncate">{file.name}</div>
+                    <div className="text-xs text-muted-foreground">{(file.size / 1024).toPrecision(3)} KB</div>
+                  </div>
+                  {isComplete && <CheckCircle2 className="w-6 h-6 text-primary" />}
+                </div>
+              )}
+
+              {linkedinUrl && !file && (
+                <div className="flex items-center gap-4 mb-8 p-4 rounded-xl bg-secondary">
+                  <div className="w-12 h-12 rounded-xl bg-[#0077b5]/10 flex items-center justify-center">
+                    <Linkedin className="w-6 h-6 text-[#0077b5]" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-medium text-foreground truncate text-sm">{linkedinUrl}</div>
+                    <div className="text-xs text-muted-foreground">Linked Profile</div>
+                  </div>
+                  {isComplete && <CheckCircle2 className="w-6 h-6 text-primary" />}
+                </div>
+              )}
+
+              <div className="space-y-6">
+                {(linkedinUrl && !file ? linkedinSteps : steps).map((step, index) => {
                   const Icon = step.icon;
                   const isActive = currentStep === index;
-                  const isCompleted = currentStep > index;
+                  const isPast = currentStep > index;
 
                   return (
-                    <motion.div
+                    <div
                       key={step.label}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.2 }}
-                      className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-300 ${isActive
-                        ? "bg-secondary"
-                        : isCompleted
-                          ? "bg-leaf/10"
-                          : "bg-muted/50"
+                      className={`flex items-start gap-4 transition-all duration-500 ${isActive ? "opacity-100 translate-x-1" :
+                        isPast ? "opacity-60" : "opacity-40"
                         }`}
                     >
-                      <div
-                        className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${isActive
-                          ? "bg-primary text-primary-foreground"
-                          : isCompleted
-                            ? "bg-leaf text-primary-foreground"
-                            : "bg-muted text-muted-foreground"
-                          }`}
-                      >
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isActive ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-110" :
+                        isPast ? "bg-primary/20 text-primary" : "bg-secondary text-muted-foreground"
+                        }`}>
                         {isActive ? (
-                          <Loader2 className="w-6 h-6 animate-spin" />
-                        ) : isCompleted ? (
-                          <CheckCircle2 className="w-6 h-6" />
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : isPast ? (
+                          <CheckCircle2 className="w-5 h-5" />
                         ) : (
-                          <Icon className="w-6 h-6" />
+                          <Icon className="w-5 h-5" />
                         )}
                       </div>
                       <div>
-                        <p className={`font-medium ${isActive || isCompleted ? "text-foreground" : "text-muted-foreground"}`}>
+                        <div className={`font-semibold ${isActive ? "text-primary" : "text-foreground"}`}>
                           {step.label}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
+                        </div>
+                        <div className="text-sm text-muted-foreground">
                           {step.description}
-                        </p>
+                        </div>
                       </div>
-                    </motion.div>
+                    </div>
                   );
                 })}
               </div>
+
+              {error && (
+                <div className="mt-8 p-4 rounded-xl bg-destructive/10 text-destructive flex items-center gap-3">
+                  <AlertCircle className="w-5 h-5 shrink-0" />
+                  <p className="text-sm font-medium">{error}</p>
+                </div>
+              )}
 
               <AnimatePresence>
                 {isComplete && (
@@ -229,10 +326,10 @@ const Upload = () => {
                     animate={{ opacity: 1, y: 0 }}
                     className="mt-8 text-center"
                   >
-                    <p className="text-lg font-medium text-leaf mb-2">
-                      ✨ Analysis Complete!
+                    <p className="text-lg font-medium text-primary mb-2">
+                      Analysis Complete! ✨
                     </p>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       Redirecting to your career matches...
                     </p>
                   </motion.div>

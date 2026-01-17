@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
-import { Menu, X, Leaf, FileText, Target, TrendingUp, Map, Info, Newspaper, MessageSquare, Linkedin } from "lucide-react";
+import { Menu, X, Leaf, FileText, Target, TrendingUp, Map, Info, Newspaper, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
@@ -12,7 +12,6 @@ const navLinks = [
   { name: "Skill Gap", path: "/skill-gap", icon: TrendingUp },
   { name: "Roadmap", path: "/roadmap", icon: Map },
   { name: "News & Insights", path: "/news", icon: Newspaper },
-  { name: "LinkedIn Tips", path: "/linkedin", icon: Linkedin },
   { name: "ChatBot", path: "/chatbot", icon: MessageSquare },
   { name: "About", path: "/about", icon: Info },
 ];

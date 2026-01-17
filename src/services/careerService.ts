@@ -65,6 +65,7 @@ export interface SkillRecommendation {
 export interface CareerPath {
     title: string;
     match: string;
+    match_score: number;
     description: string;
     next_steps: string[];
 }
@@ -113,6 +114,24 @@ export async function uploadResume(file: File): Promise<ResumeUploadResponse> {
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.detail || 'Failed to upload resume');
+    }
+
+    return await response.json();
+}
+
+// Extract and parse from LinkedIn URL
+export async function extractLinkedIn(url: string): Promise<ResumeUploadResponse> {
+    const response = await fetch(`${CAREER_API_URL}/extract-linkedin`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ target_role: url }), // Passing URL as the payload
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to link LinkedIn profile');
     }
 
     return await response.json();
