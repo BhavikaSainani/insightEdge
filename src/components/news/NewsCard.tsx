@@ -64,15 +64,27 @@ export const NewsCard = ({ article, variant = "default" }: NewsCardProps) => {
               <span>{article.source}</span>
             </div>
             
-            <Link to={`/news/${article.id}`}>
-              <motion.div
-                whileHover={{ x: 5 }}
-                className="inline-flex items-center gap-2 text-primary font-medium group"
-              >
-                Read Full Story
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </motion.div>
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link to={`/news/${article.id}`}>
+                <motion.div
+                  whileHover={{ x: 5 }}
+                  className="inline-flex items-center gap-2 text-primary font-medium group"
+                >
+                  Read Full Story
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </motion.div>
+              </Link>
+              {article.url && (
+                <a
+                  href={article.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  (Original Source)
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </motion.div>
@@ -109,15 +121,28 @@ export const NewsCard = ({ article, variant = "default" }: NewsCardProps) => {
         <span>{article.source}</span>
       </div>
       
-      <Link to={`/news/${article.id}`}>
-        <motion.div
-          whileHover={{ x: 5 }}
-          className="inline-flex items-center gap-2 text-primary font-medium text-sm group"
-        >
-          Read More
-          <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-        </motion.div>
-      </Link>
+      <div className="flex items-center gap-3">
+        <Link to={`/news/${article.id}`}>
+          <motion.div
+            whileHover={{ x: 5 }}
+            className="inline-flex items-center gap-2 text-primary font-medium text-sm group"
+          >
+            Read More
+            <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+          </motion.div>
+        </Link>
+        {article.url && (
+          <a
+            href={article.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-muted-foreground hover:text-primary transition-colors"
+            onClick={(e) => e.stopPropagation()}
+          >
+            Source
+          </a>
+        )}
+      </div>
     </motion.div>
   );
 };

@@ -1,15 +1,58 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Calendar, ExternalLink, Building2 } from "lucide-react";
+import { ArrowLeft, Calendar, ExternalLink, Building2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CareerRelevance } from "@/components/news/CareerRelevance";
 import { getArticleById } from "@/lib/news-data";
+import { getLatestNews, getPast30DaysNews } from "@/lib/news-service";
 import { Badge } from "@/components/ui/badge";
+import { NewsArticle } from "@/lib/news-data";
 
 const Article = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const article = id ? getArticleById(id) : undefined;
+  const [article, setArticle] = useState<NewsArticle | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadArticle = async () => {
+      if (!id) return;
+      
+      setIsLoading(true);
+      
+      // First try mock data
+      let foundArticle = getArticleById(id);
+      
+      // If not found in mock data, search in real news
+      if (!foundArticle) {
+        try {
+          const latestNews = await getLatestNews();
+          const past30News = await getPast30DaysNews();
+          const allNews = [...latestNews, ...past30News];
+          foundArticle = allNews.find(a => a.id === id);
+        } catch (error) {
+          console.error("Error loading article:", error);
+        }
+      }
+      
+      setArticle(foundArticle);
+      setIsLoading(false);
+    };
+    
+    loadArticle();
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen pt-24 pb-16 flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="w-8 h-8 text-primary animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading article...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!article) {
     return (
@@ -17,7 +60,7 @@ const Article = () => {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-foreground mb-4">Article Not Found</h1>
           <p className="text-muted-foreground mb-6">
-            The article you're looking for doesn't exist.
+            The article you're looking for doesn't exist or may have been removed.
           </p>
           <Link to="/news">
             <Button className="btn-forest">Back to News</Button>
@@ -97,6 +140,20 @@ const Article = () => {
               <ExternalLink className="w-4 h-4" />
               {article.source}
             </div>
+            {article.url && (
+              <>
+                <span>•</span>
+                <a
+                  href={article.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-primary hover:underline"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Read on {article.source}
+                </a>
+              </>
+            )}
           </div>
         </motion.div>
 
@@ -108,19 +165,38 @@ const Article = () => {
           className="max-w-4xl mx-auto"
         >
           <div className="card-urban p-8 md:p-12 mb-8">
-            <div className="prose prose-lg max-w-none">
-              {paragraphs.map((paragraph, index) => (
-                <motion.p
-                  key={index}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
-                  className="text-muted-foreground leading-relaxed mb-6 text-base md:text-lg"
-                >
-                  {paragraph}
-                </motion.p>
-              ))}
-            </div>
+            {paragraphs.length > 0 ? (
+              <div className="prose prose-lg max-w-none">
+                {paragraphs.map((paragraph, index) => (
+                  <motion.p
+                    key={index}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
+                    className="text-muted-foreground leading-relaxed mb-6 text-base md:text-lg"
+                  >
+                    {paragraph}
+                  </motion.p>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-6">
+                  {article.summary}
+                </p>
+                {article.url && (
+                  <a
+                    href={article.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 btn-forest"
+                  >
+                    Read Full Article on {article.source}
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Career Relevance Section */}

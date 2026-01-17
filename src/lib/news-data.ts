@@ -20,6 +20,7 @@ export interface NewsArticle {
   source: string;
   publishedDate: string;
   imageUrl?: string;
+  url?: string; // Link to original article
   relatedRoles: SmartCityRole[];
   skillsMentioned: string[];
   careerRelevance: string;
