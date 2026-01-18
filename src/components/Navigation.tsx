@@ -19,12 +19,23 @@ const navGroups = [
     ]
   },
   {
-    name: "Community & Growth",
+    name: "Network",
     items: [
       { name: "Peer Network", path: "/peer-network", icon: Users, description: "Connect with others" },
-      { name: "Global Marketplace", path: "/global-opportunities", icon: Globe, description: "Explore the world" },
-      { name: "News & Insights", path: "/news", icon: Newspaper, description: "Stay informed" },
-      { name: "ChatBot", path: "/chatbot", icon: MessageSquare, description: "Instant assistance" },
+      { name: "Global Marketplace", path: "/global-opportunities", icon: Globe, description: "Explore opportunities" },
+    ]
+  },
+  {
+    name: "Insights",
+    items: [
+      { name: "News & Insights", path: "/news", icon: Newspaper, description: "Stay informed with trends" },
+      { name: "Market Trends", path: "/impact", icon: TrendingUp, description: "Analyze market impact" },
+    ]
+  },
+  {
+    name: "Assistant",
+    items: [
+      { name: "ChatBot", path: "/chatbot", icon: MessageSquare, description: "Instant AI assistance" },
     ]
   }
 ];
