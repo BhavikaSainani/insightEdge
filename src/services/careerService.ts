@@ -139,8 +139,14 @@ export async function uploadResume(file: File): Promise<ResumeUploadResponse> {
     });
 
     if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to upload resume');
+        let errorDetail = 'Failed to upload resume';
+        try {
+            const error = await response.json();
+            errorDetail = error.detail || errorDetail;
+        } catch (e) {
+            errorDetail = `Server Error (${response.status})`;
+        }
+        throw new Error(errorDetail);
     }
 
     return await response.json();
@@ -199,8 +205,14 @@ export async function getCareerPaths(): Promise<CareerPathsResponse> {
     const response = await fetch(`${CAREER_API_URL}/career-paths`);
 
     if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to get career paths');
+        let errorDetail = 'Failed to get career paths';
+        try {
+            const error = await response.json();
+            errorDetail = error.detail || errorDetail;
+        } catch (e) {
+            errorDetail = `Server Error (${response.status})`;
+        }
+        throw new Error(errorDetail);
     }
 
     return await response.json();
@@ -217,15 +229,18 @@ export async function sendChatMessage(question: string): Promise<ChatResponse> {
     });
 
     if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to get chat response');
+        let errorDetail = 'Failed to get chat response';
+        try {
+            const error = await response.json();
+            errorDetail = error.detail || errorDetail;
+        } catch (e) {
+            errorDetail = `Server Error (${response.status})`;
+        }
+        throw new Error(errorDetail);
     }
 
     return await response.json();
 }
-
-<<<<<<< HEAD
-// ============ Peer Learning Network ============
 
 export interface PeerMatch {
     peer_id: string;
@@ -259,8 +274,19 @@ export async function getPeerMatches(): Promise<PeerMatchesResponse> {
     const response = await fetch(`${CAREER_API_URL}/peer-matches`);
 
     if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to get peer matches');
+        let errorDetail = 'Failed to get peer matches';
+        try {
+            const error = await response.json();
+            errorDetail = error.detail || errorDetail;
+        } catch (e) {
+            // Handle 404 specifically for outdated server detection
+            if (response.status === 404) {
+                errorDetail = `Endpoint not found (404). Your server might be outdated.`;
+            } else {
+                errorDetail = `Server Error (${response.status})`;
+            }
+        }
+        throw new Error(errorDetail);
     }
 
     return await response.json();
@@ -279,7 +305,11 @@ export async function connectWithPeer(peerId: string): Promise<PeerConnectionRes
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.detail || 'Failed to connect with peer');
-=======
+    }
+
+    return await response.json();
+}
+
 // Get global skill arbitrage opportunities
 export async function getSkillArbitrage(): Promise<SkillArbitrageResponse> {
     const response = await fetch(`${CAREER_API_URL}/skill-arbitrage`);
@@ -287,7 +317,6 @@ export async function getSkillArbitrage(): Promise<SkillArbitrageResponse> {
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.detail || 'Failed to get skill arbitrage data');
->>>>>>> 69abee37189299733e5d4556b21d87728e59b199
     }
 
     return await response.json();

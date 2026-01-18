@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Mail, Lock, User, Leaf, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/lib/AuthContext';
+import { motion } from 'framer-motion';
+import { Lock, LogIn, Mail, User } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Auth = () => {
     const [isLogin, setIsLogin] = useState(true);
@@ -91,11 +91,15 @@ const Auth = () => {
             >
                 <div className="card-urban p-8">
                     {/* Logo */}
-                    <div className="flex items-center justify-center gap-2 mb-8">
-                        <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
-                            <Leaf className="w-6 h-6 text-primary-foreground" />
+                    <div className="flex flex-col items-center justify-center gap-4 mb-10">
+                        <div className="w-32 h-32 rounded-full bg-[#1B4332] flex items-center justify-center overflow-hidden shadow-2xl border-4 border-white/20">
+                            <img
+                                src="/logo.jpg"
+                                alt="InsightEdge Logo"
+                                className="w-28 h-28 object-contain"
+                            />
                         </div>
-                        <span className="text-2xl font-bold text-primary">InsightEdge</span>
+                        <span className="text-5xl font-black text-gradient-forest tracking-tighter">InsightEdge</span>
                     </div>
 
                     {/* Title */}
