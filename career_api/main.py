@@ -63,52 +63,62 @@ ROLE_DEFINITIONS = {
     "Urban Data Scientist": {
         "requirements": ["python", "machine learning", "data science", "statistics", "data analysis", "pandas", "numpy"],
         "description": "Apply data science and ML to solve urban challenges and improve city services",
-        "next_steps": ["Learn GIS & Spatial Analysis", "Study Urban Analytics", "Build city data projects"]
+        "next_steps": ["Learn GIS & Spatial Analysis", "Study Urban Analytics", "Build city data projects"],
+        "salary_range": "$90,000 - $140,000"
     },
     "GIS Analyst": {
         "requirements": ["gis", "spatial analysis", "python", "arcgis", "qgis", "remote sensing", "cartography", "data visualization"],
         "description": "Analyze spatial data to support urban planning and city operations",
-        "next_steps": ["Master ArcGIS/QGIS", "Learn Remote Sensing", "Study Urban Geography"]
+        "next_steps": ["Master ArcGIS/QGIS", "Learn Remote Sensing", "Study Urban Geography"],
+        "salary_range": "$55,000 - $85,000"
     },
     "Smart City Analyst": {
         "requirements": ["data analysis", "excel", "sql", "tableau", "power bi", "visualization", "data analytics", "python", "gis", "urban planning", "iot", "statistics", "public policy"],
         "description": "Analyze city data to drive smarter urban planning and policy decisions",
-        "next_steps": ["Learn GIS Tools", "Study Urban Planning Basics", "Understand IoT & Sensors"]
+        "next_steps": ["Learn GIS Tools", "Study Urban Planning Basics", "Understand IoT & Sensors"],
+        "salary_range": "$65,000 - $95,000"
     },
     "Transportation Systems Analyst": {
         "requirements": ["transportation", "traffic", "mobility", "logistics", "simulation", "urban mobility", "traffic modeling", "python", "gis"],
         "description": "Optimize transportation networks and urban mobility systems",
-        "next_steps": ["Learn Traffic Modeling", "Study Urban Mobility Analytics", "Master Simulation Tools"]
+        "next_steps": ["Learn Traffic Modeling", "Study Urban Mobility Analytics", "Master Simulation Tools"],
+        "salary_range": "$70,000 - $100,000"
     },
     "IoT Engineer (Smart Cities)": {
         "requirements": ["iot", "sensors", "embedded systems", "networking", "hardware", "mqtt", "cloud platforms", "data streaming", "python"],
         "description": "Design and deploy IoT sensor networks for smart city infrastructure",
-        "next_steps": ["Learn MQTT & Data Streaming", "Study Cloud Platforms", "Build Smart Sensor Projects"]
+        "next_steps": ["Learn MQTT & Data Streaming", "Study Cloud Platforms", "Build Smart Sensor Projects"],
+        "salary_range": "$85,000 - $130,000"
     },
     "Smart Infrastructure Engineer": {
         "requirements": ["engineering", "infrastructure", "systems", "electrical", "civil", "smart grid", "iot", "sensors", "networking", "cloud computing"],
         "description": "Design and manage smart city infrastructure and connected systems",
-        "next_steps": ["Learn IoT & Sensors", "Study Smart Grid Technology", "Understand City Networks"]
+        "next_steps": ["Learn IoT & Sensors", "Study Smart Grid Technology", "Understand City Networks"],
+        "salary_range": "$80,000 - $120,000"
     },
     "Sustainability Analyst": {
         "requirements": ["sustainability", "environment", "climate", "carbon", "green", "renewable", "esg", "sustainability metrics", "data analysis"],
         "description": "Measure and improve city sustainability and environmental impact",
-        "next_steps": ["Learn Sustainability Metrics", "Study Energy Optimization", "Understand Carbon Accounting"]
+        "next_steps": ["Learn Sustainability Metrics", "Study Energy Optimization", "Understand Carbon Accounting"],
+        "salary_range": "$60,000 - $90,000"
     },
     "Civic Tech Developer": {
         "requirements": ["python", "javascript", "web", "api", "programming", "software", "react", "node.js", "api development", "open data", "civic engagement"],
         "description": "Build applications that improve civic engagement and city services",
-        "next_steps": ["Work with Open Data APIs", "Learn Civic Design", "Build Community Tech Projects"]
+        "next_steps": ["Work with Open Data APIs", "Learn Civic Design", "Build Community Tech Projects"],
+        "salary_range": "$75,000 - $115,000"
     },
     "Urban AI Engineer": {
         "requirements": ["machine learning", "deep learning", "ai", "tensorflow", "pytorch", "computer vision", "neural networks", "urban analytics", "python", "data engineering"],
         "description": "Apply AI and computer vision to urban challenges like traffic and safety",
-        "next_steps": ["Study Computer Vision", "Learn Urban Analytics", "Build Smart City AI Models"]
+        "next_steps": ["Study Computer Vision", "Learn Urban Analytics", "Build Smart City AI Models"],
+        "salary_range": "$100,000 - $160,000"
     },
     "Energy Systems Engineer": {
         "requirements": ["energy", "power", "electrical", "grid", "renewable", "smart grid", "energy optimization", "iot", "data analysis"],
         "description": "Design and optimize smart grid and city energy systems",
-        "next_steps": ["Learn Smart Grid Tech", "Study Energy Optimization", "Understand Renewable Integration"]
+        "next_steps": ["Learn Smart Grid Tech", "Study Energy Optimization", "Understand Renewable Integration"],
+        "salary_range": "$80,000 - $125,000"
     }
 }
 
@@ -641,7 +651,7 @@ async def career_chat(request: ChatRequest):
     """AI-powered career advice chat"""
     
     question = request.question.lower()
-    resume_data = current_session.get("resume_data", {})
+    resume_data = current_session.get("resume_data") or {}
     
     # Generate contextual response based on question and resume
     response = generate_career_advice(question, resume_data)
@@ -951,40 +961,70 @@ def generate_career_advice(question: str, resume_data: Dict) -> str:
     skills = resume_data.get("skills", [])
     projects = resume_data.get("projects", [])
     
-    # Pattern-based responses (fallback when RAG not available)
+    # 1. Scope Filtering
+    allowed_topics = ["insightedge", "website", "platform", "app", "resume", "career", "skill", "job", "learn", "match", "network", "peer", "roadmap", "iot", "engineer", "data scientist", "analyst", "planning", "mobility", "infrastructure", "sustainability", "developer", "ai", "city", "location", "place", "india", "gujarat", "ahmedabad", "gandhinagar"]
+    
+    is_allowed = any(topic in question for topic in allowed_topics) or \
+                 any(role.lower() in question for role in ROLE_DEFINITIONS.keys())
+    
+    if not is_allowed:
+        return "I'm an InsightEdge ChatBot, I can't answer this. I can only help you with questions related to the InsightEdge platform, website development concepts, career advice, or job roles and locations in our system."
+
+    # 2. Extract Data
+    role_entry = next(((k, v) for k, v in ROLE_DEFINITIONS.items() if k.lower() in question), None)
+    
+    # Location Matching
+    indian_cities = [r for r in REGIONAL_DEMAND_DATA if r.get("is_local")]
+    location_keywords = ["city", "place", "location", "where", "gujarat", "india"]
+    is_location_query = any(kw in question for kw in location_keywords)
+    matched_region = next((r for r in REGIONAL_DEMAND_DATA if r["city"].lower() in question or r["country"].lower() in question), None)
+    
+    # 3. Generate Combined Response
+    response_parts = []
+    
+    # Salary Keywords
+    salary_keywords = ["salary", "earn", "pay", "compensation", "income", "package"]
+    is_salary_query = any(kw in question for kw in salary_keywords)
+
+    # Add Role Info
+    if role_entry:
+        role_name, role_info = role_entry
+        if is_salary_query:
+            response_parts.append(f"For a {role_name}, the typical salary range is {role_info.get('salary_range', 'variable')} (highly dependent on location and experience).")
+        
+        response_parts.append(f"Pursuing a career as a {role_name} is an excellent path! {role_info.get('description', '')}. You'll need to master skills like {', '.join(role_info['requirements'][:4])}.")
+
+    # Add Location Info
+    if matched_region:
+        response_parts.append(f"Regarding your query about {matched_region['city']}, there is currently a {matched_region['demand']} demand for such talent. {matched_region['description']} Salaries in this region average around ${matched_region['avg_salary_usd']}.")
+    elif "gujarat" in question or "ahmedabad" in question or "gandhinagar" in question:
+        response_parts.append("For Gujarat (especially Ahmedabad/Gandhinagar), we're seeing massive growth in tech hubs like GIFT City. While I don't have the exact salary metrics yet, it's becoming a major center for IT and infrastructure.")
+    elif "india" in question:
+        cities_str = ", ".join([c['city'] for c in indian_cities])
+        response_parts.append(f"Across India, key hubs for these roles include {cities_str}. Each city specializes in different sectors, like Bangalore for Software and Mumbai for Data.")
+
+    if response_parts:
+        return " ".join(response_parts)
+
+    # 4. Keyword Fallbacks
     if "skill" in question and "gap" in question:
-        return "I can help analyze your skills gap! Use the Skills Gap Analysis feature by specifying your target role. I'll compare your current skills with the requirements and provide personalized recommendations."
+        return "I can help analyze your skills gap! Use the Skills Gap Analysis feature to compare your profile with industry requirements and get custom learning paths from Udemy and SWAYAM."
     
     elif "career" in question and "path" in question:
         if skills:
-            return f"Based on your skills ({', '.join(skills[:5])}), I see great potential in software development and data-related roles. Check out the Career Paths feature for detailed suggestions tailored to your profile!"
-        return "To suggest career paths, I need to analyze your resume. Please upload your resume first, and I'll provide personalized career recommendations."
+            return f"Based on your resume skills like {', '.join(skills[:3])}, I recommend checking out the 'Career Match' section for a full breakdown of your best-fit roles."
+        return "To suggest career paths, please upload your resume first! I'll then be able to provide personalized recommendations tailored to your experience."
     
     elif "resume" in question or "improve" in question:
         if resume_data:
-            tips = []
-            if len(skills) < 5:
-                tips.append("Add more technical skills to showcase your capabilities")
-            if len(projects) < 2:
-                tips.append("Include more projects to demonstrate practical experience")
-            tips.append("Use action verbs and quantify achievements where possible")
-            return "Here are some tips to improve your resume:\n• " + "\n• ".join(tips)
-        return "Upload your resume first, and I'll provide specific improvement suggestions!"
+            return "Based on your resume, I suggest: 1) Using action verbs for projects, 2) Quantifying your achievements, and 3) Highlighting your technical stack clearly."
+        return "Upload your resume first, and I'll provide specific tips to make it stand out to recruiters!"
     
-    elif "learn" in question or "study" in question:
-        if skills:
-            return f"Given your current skills in {', '.join(skills[:3])}, I recommend deepening your expertise in these areas while also learning complementary skills. For specific learning paths, use the Skills Gap Analysis with your target role."
-        return "I'd recommend starting with fundamentals: Python for versatility, SQL for data work, and Git for collaboration. What field interests you most?"
-    
-    elif "interview" in question:
-        return "For interview preparation:\n• Review data structures & algorithms (LeetCode)\n• Practice behavioral questions (STAR method)\n• Research the company thoroughly\n• Prepare questions to ask the interviewer\n• Practice explaining your projects clearly"
-    
-    elif "salary" in question or "pay" in question:
-        return "Salary varies by role, location, and experience. For accurate data, check Glassdoor, Levels.fyi, or LinkedIn Salary Insights. Focus on building skills and demonstrating value - compensation follows!"
-    
-    else:
-        # Generic helpful response
-        return f"I'm here to help with your career! You can:\n• Ask about skills gap analysis\n• Get career path suggestions\n• Receive resume improvement tips\n• Learn about interview preparation\n\nWhat would you like to explore?"
+    elif "website" in question or "insightedge" in question:
+        return "InsightEdge is your AI-powered career companion for the Smart City sector. We help you with resume management, skills gap analysis, and networking. What specific tool would you like to learn about?"
+
+    # 5. Default Response
+    return f"I'm here to help with your career! Regarding your interest in '{question}', I recommend using the Roadmap or Peer Network tools for more detailed insights."
 
 
 # ============ Run Server ============

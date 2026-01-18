@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 
-interface Message { role: "user" | "assistant"; content: string; }
+import { sendChatMessage } from "@/services/careerService";
 
-const API_URL = import.meta.env.PROD ? '/api/chat' : 'http://localhost:3001/api/chat';
+interface Message { role: "user" | "assistant"; content: string; }
 
 const ChatBot = () => {
     const [messages, setMessages] = useState<Message[]>([]);
@@ -31,15 +31,8 @@ const ChatBot = () => {
         setInput(""); resetTranscript(); setIsLoading(true);
 
         try {
-            const res = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: userMsg, history: messages })
-            });
-            const data = await res.json();
-
-            if (data.error) throw new Error(data.error);
-            setMessages(prev => [...prev, { role: "assistant", content: data.response }]);
+            const data = await sendChatMessage(userMsg);
+            setMessages(prev => [...prev, { role: "assistant", content: data.answer }]);
         } catch (err: any) {
             let errorMsg = "Sorry, couldn't connect to the server. Make sure the backend is running.";
             if (typeof err === 'string') {
