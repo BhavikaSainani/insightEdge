@@ -19,7 +19,7 @@ pip install -r requirements.txt
 python main.py
 ```
 
-Server runs at: http://localhost:8001
+Server runs at: http://localhost:8000
 
 ## API Endpoints
 

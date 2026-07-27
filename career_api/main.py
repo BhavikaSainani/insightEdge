@@ -992,6 +992,6 @@ def generate_career_advice(question: str, resume_data: Dict) -> str:
 if __name__ == "__main__":
     import uvicorn
     print("Starting Career Advisor API...")
-    print("Server will be available at: http://localhost:8001")
-    print("API docs at: http://localhost:8001/docs")
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    print("Server will be available at: http://localhost:8000")
+    print("API docs at: http://localhost:8000/docs")
+    uvicorn.run(app, host="0.0.0.0", port=8000)

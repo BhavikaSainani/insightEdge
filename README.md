@@ -1,110 +1,100 @@
-# InsightEdge 
+# InsightEdge
 
-> **AI-Powered Career Navigator for the Smart City Ecosystem**
+> AI-powered career guidance for Smart Cities and urban technology.
 
-InsightEdge is a premium career guidance platform specifically designed for professionals and students entering the **Smart Cities & Urban Technology** domain. It combines traditional resume parsing with modern AI intelligence to provide a holistic career growth experience.
+InsightEdge combines resume parsing, skill analysis, career path matching, and a career chatbot to help users discover Smart City career opportunities.
 
 ---
 
 ## Key Features
 
-- **Multi-Source Entry**: Upload traditional **PDF Resumes** or link your **LinkedIn Profile** for instant analysis.
-- **Smart Career Match**: Discover 10+ specialized Smart City roles (e.g., Urban Data Scientist, GIS Analyst, IoT Engineer) with deterministic relevancy scoring.
-- **Skill Gap Visualization**: High-fidelity Radar charts comparing your current skills against industry-standard requirements.
-- **AI Career Chatbot**: A Gemini-powered companion for career advice, supporting both **Text and Voice** input.
-- **Real-Time News Hub**: Live industry updates aggregated from NewsAPI and curated Smart City RSS feeds.
-- **Learning Roadmaps**: Direct links to free Indian Government courses (**SWAYAM**) and specialized Udemy paths.
+- Upload **PDF resumes** for AI resume parsing and skill extraction
+- Link **LinkedIn profiles** for profile analysis
+- Discover **career matches** in Smart City roles
+- Analyze **skill gaps** and next learning steps
+- Chat with an AI career assistant powered by Gemini
+- View **industry news** and career insights
 
 ---
 
 ## Tech Stack
 
-### Frontend
-- **Framework**: React 18 (Vite) + TypeScript
-- **Styling**: Tailwind CSS + Framer Motion (Animations)
-- **Viz**: Recharts (Radar/Progress)
-
-### Backend Services (Dual-Stack)
-- **Career Backend**: FastAPI (Python) - *Resume parsing & Matching*
-- **AI Middleware**: Node.js (Express) - *Gemini AI integration*
-
-### AI & Data
-- **LLM**: Google Gemini 1.5/2.0
-- **Parsing**: PyMuPDF (fitz)
-- **External**: NewsAPI, SWAYAM/NPTEL API
+- Frontend: **React 18 + Vite + TypeScript**
+- Styling: **Tailwind CSS**
+- Career backend: **FastAPI (Python)**
+- AI chat backend: **Express / Node.js**
+- PDF parsing: **PyMuPDF**
 
 ---
 
-## Setup & Local Development
+## Local Setup
 
-Follow these steps to get the full platform running on your machine.
-
-### 1. Clone & Install Dependencies
+### 1. Install dependencies
 ```bash
-# Clone the repository
-git clone https://github.com/BhavikaSainani/insightEdge.git
-cd insightEdge
-
-# Install Frontend & Node dependencies
+cd D:\Projects\insightEdge
 npm install
 ```
 
-### 2. Configure Environment Variables
-Create a `.env` file in the root directory:
-```env
-# AI Middleware (Node)
-GEMINI_API_KEY=your_gemini_api_key_here
+### 2. Install Python backend dependencies
+```bash
+cd career_api
+python -m pip install -r requirements.txt
+```
 
-# Frontend (Vite)
+### 3. Configure environment variables
+Create a `.env` file in the root folder:
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
 VITE_NEWSAPI_KEY=your_newsapi_key_here
 ```
 
-### 3. Start the Backend Services
-You need to run **two** backend servers for full functionality:
+### 4. Start the backend services
 
-**A. Python Career API (Port 8001)**
+#### Python Career API
 ```bash
-cd career_api
-pip install -r requirements.txt
+cd D:\Projects\insightEdge\career_api
 python main.py
 ```
+This backend listens on **http://localhost:8000**.
 
-**B. Node.js AI Server (Port 3001)**
+#### Node AI Chat Server
 ```bash
-# From the project root
-npm run dev:server
-# OR
-node server.ts
+cd D:\Projects\insightEdge
+npm run server
 ```
+This server listens on **http://localhost:3001**.
 
-### 4. Start the Frontend
+### 5. Start the frontend
 ```bash
-# From the project root
+cd D:\Projects\insightEdge
 npm run dev
 ```
-Open [http://localhost:8080](http://localhost:8080) to view the app!
+Open **http://localhost:8080** in your browser.
 
 ---
 
-##  Test Credentials
-InsightEdge currently uses a local session-based approach and does not require a database login for the primary features. 
-- **User Access**: Guest access enabled by default.
-- **Mock Data**: For LinkedIn integration tests, you can use any valid `linkedin.com/in/...` URL.
+## Notes
+
+- The frontend proxies Career API calls to **http://localhost:8000**.
+- The chat feature calls **http://localhost:3001/api/chat** in development.
+- Keep both backend servers running for full AI and resume upload functionality.
 
 ---
 
-##  Basic Error Handling
+## Troubleshooting
 
-| Issue | Solution |
-| :--- | :--- |
-| **"Could not connect to Career API"** | Ensure the Python server is running on port **8001**. |
-| **"AI Chat unavailable"** | Ensure the Node server is running on port **3001** and your `GEMINI_API_KEY` is valid. |
-| **News not loading** | Check your `VITE_NEWSAPI_KEY` or wait for the system to fallback to RSS feeds. |
+| Problem | Fix |
+| --- | --- |
+| Career API unavailable | Make sure `python main.py` is running from `career_api/` on port **8000** |
+| AI Chat fails | Make sure `npm run server` is running and `GEMINI_API_KEY` is set |
+| Frontend errors | Restart `npm run dev` after starting both backends |
 
 ---
 
-##  Security
-- **No Secrets**: This repository uses `.gitignore` to ensure no active API keys or environment secrets are committed.
-- **Environment Management**: All sensitive keys are managed via local `.env` files.
+## Helpful commands
+
+- `npm run dev` — start the frontend
+- `npm run server` — start the Node AI backend
+- `python main.py` — start the Python career backend
 
 
