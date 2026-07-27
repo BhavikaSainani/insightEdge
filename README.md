@@ -53,10 +53,10 @@ npm install
 Create a `.env` file in the root directory:
 ```env
 # AI Middleware (Node)
-GEMINI_API_KEY=AIzaSyCmHHEFcueKK_OTL87MjG-jP_T8YTpEzLs
+GEMINI_API_KEY=your_gemini_api_key_here
 
 # Frontend (Vite)
-VITE_NEWSAPI_KEY=b196ecf403174c82857f0b691c6c119c
+VITE_NEWSAPI_KEY=your_newsapi_key_here
 ```
 
 ### 3. Start the Backend Services
