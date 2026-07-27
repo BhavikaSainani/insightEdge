@@ -1,0 +1,275 @@
+/**
+ * Career API Service
+ * Communicates with the FastAPI Career Advisor backend
+ */
+
+const CAREER_API_URL = '/api';
+
+export interface ResumeUploadResponse {
+    success: boolean;
+    message: string;
+    filename: string;
+    characters_extracted: number;
+    skills_found: number;
+    projects_found: number;
+    quality: ResumeQuality;
+}
+
+export interface ResumeQuality {
+    completeness_score: number;
+    missing_sections: string[];
+    recommendations: string[];
+    strengths: string[];
+}
+
+export interface ResumeAnalysis {
+    contact: {
+        email?: string;
+        phone?: string;
+        linkedin?: string;
+        github?: string;
+    };
+    education: string[];
+    experience: string[];
+    projects: string[];
+    skills: string[];
+    certifications: string[];
+    achievements: string[];
+    quality_analysis: ResumeQuality;
+    metadata: {
+        total_characters?: number;
+        total_lines?: number;
+        sections_found: string[];
+        contact_info_found: boolean;
+        source?: string;
+        filename?: string;
+    };
+}
+
+export interface SkillsGapAnalysis {
+    target_role: string;
+    current_skills: string[];
+    required_skills: string[];
+    matching_skills: string[];
+    missing_skills: string[];
+    match_percentage: number;
+    recommendations: SkillRecommendation[];
+    readiness: 'High' | 'Medium' | 'Low';
+}
+
+export interface SkillRecommendation {
+    skill: string;
+    resource: string;
+    url: string;
+    duration: string;
+}
+
+export interface CareerPath {
+    title: string;
+    match: string;
+    match_score: number;
+    description: string;
+    next_steps: string[];
+}
+
+export interface CareerPathsResponse {
+    skills_detected: string[];
+    career_paths: CareerPath[];
+    total_paths: number;
+}
+
+export interface ChatResponse {
+    answer: string;
+    rag_used: boolean;
+}
+
+export interface ArbitrageOpportunity {
+    region: string;
+    country: string;
+    city: string;
+    flag: string;
+    value_index: number;
+    value_multiplier: string;
+    demand: string;
+    salary_usd: number;
+    col_index: number;
+    remote_friendly: boolean;
+    visa_ease: string;
+    description: string;
+    dominant_sector: string;
+    is_local: boolean;
+    top_matching_skills: string[];
+}
+
+export interface SkillArbitrageResponse {
+    opportunities: ArbitrageOpportunity[];
+    local_market: ArbitrageOpportunity;
+    user_best_fit: string;
+    total_regions: number;
+}
+
+export interface HealthCheck {
+    status: string;
+    service: string;
+    features: string[];
+}
+
+async function parseCareerApiResponse<T>(response: Response): Promise<T> {
+    const text = await response.text();
+    let payload: any = null;
+
+    if (text) {
+        try {
+            payload = JSON.parse(text);
+        } catch {
+            payload = text;
+        }
+    }
+
+    if (!response.ok) {
+        const message = payload && typeof payload === 'object' && 'detail' in payload
+            ? payload.detail
+            : typeof payload === 'string' && payload.length > 0
+                ? payload
+                : response.statusText || 'Failed to communicate with Career API';
+        throw new Error(message);
+    }
+
+    if (payload === null) {
+        throw new Error('Career API returned invalid response');
+    }
+
+    return payload as T;
+}
+
+// Check if Career API is available
+export async function checkCareerApiHealth(): Promise<HealthCheck | null> {
+    try {
+        const response = await fetch(`${CAREER_API_URL}/`);
+        if (response.ok) {
+            return await parseCareerApiResponse<HealthCheck>(response);
+        }
+        return null;
+    } catch (error) {
+        console.error('Career API not available:', error);
+        return null;
+    }
+}
+
+// Upload and parse resume
+export async function uploadResume(file: File): Promise<ResumeUploadResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${CAREER_API_URL}/upload-resume`, {
+        method: 'POST',
+        body: formData,
+    });
+
+    return await parseCareerApiResponse<ResumeUploadResponse>(response);
+}
+
+// Extract and parse from LinkedIn URL
+export async function extractLinkedIn(url: string): Promise<ResumeUploadResponse> {
+    const response = await fetch(`${CAREER_API_URL}/extract-linkedin`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ target_role: url }), // Passing URL as the payload
+    });
+
+    return await parseCareerApiResponse<ResumeUploadResponse>(response);
+}
+
+// Get detailed resume analysis
+export async function getResumeAnalysis(): Promise<ResumeAnalysis> {
+    const response = await fetch(`${CAREER_API_URL}/analyze-resume`);
+    return await parseCareerApiResponse<ResumeAnalysis>(response);
+}
+
+// Analyze skills gap for a target role
+export async function analyzeSkillsGap(targetRole: string): Promise<SkillsGapAnalysis> {
+    const response = await fetch(`${CAREER_API_URL}/skills-gap`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ target_role: targetRole }),
+    });
+
+    return await parseCareerApiResponse<SkillsGapAnalysis>(response);
+}
+
+// Get career path suggestions
+export async function getCareerPaths(): Promise<CareerPathsResponse> {
+    const response = await fetch(`${CAREER_API_URL}/career-paths`);
+    return await parseCareerApiResponse<CareerPathsResponse>(response);
+}
+
+// Chat with AI career advisor
+export async function sendChatMessage(question: string): Promise<ChatResponse> {
+    const response = await fetch(`${CAREER_API_URL}/chat`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ question }),
+    });
+
+    return await parseCareerApiResponse<ChatResponse>(response);
+}
+
+// ============ Peer Learning Network ============
+
+export interface PeerMatch {
+    peer_id: string;
+    pseudonym: string;
+    target_role: string;
+    they_can_teach: string[];
+    you_can_teach: string[];
+    match_score: number;
+    contact_preference: string;
+}
+
+export interface PeerMatchesResponse {
+    user_skills: string[];
+    peers: PeerMatch[];
+    total_potential_peers: number;
+}
+
+export interface PeerConnectionResponse {
+    success: boolean;
+    message: string;
+    peer: {
+        pseudonym: string;
+        target_role: string;
+        contact_preference: string;
+        contact_value: string;
+    };
+}
+
+// Get peer learning matches
+export async function getPeerMatches(): Promise<PeerMatchesResponse> {
+    const response = await fetch(`${CAREER_API_URL}/peer-matches`);
+    return await parseCareerApiResponse<PeerMatchesResponse>(response);
+}
+
+// Connect with a peer
+export async function connectWithPeer(peerId: string): Promise<PeerConnectionResponse> {
+    const response = await fetch(`${CAREER_API_URL}/connect-peer`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ peer_id: peerId }),
+    });
+
+    return await parseCareerApiResponse<PeerConnectionResponse>(response);
+}
+
+// Get global skill arbitrage opportunities
+export async function getSkillArbitrage(): Promise<SkillArbitrageResponse> {
+    const response = await fetch(`${CAREER_API_URL}/skill-arbitrage`);
+    return await parseCareerApiResponse<SkillArbitrageResponse>(response);
+}
