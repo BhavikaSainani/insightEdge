@@ -8,7 +8,9 @@ import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognitio
 
 interface Message { role: "user" | "assistant"; content: string; }
 
-const API_URL = import.meta.env.PROD ? '/api/chat' : 'http://localhost:3001/api/chat';
+const API_URL = import.meta.env.VITE_BACKEND_URL
+    ? `${import.meta.env.VITE_BACKEND_URL.replace(/\/$/, '')}/api/chat`
+    : (import.meta.env.PROD ? '/api/chat' : 'http://localhost:3001/api/chat');
 
 const ChatBot = () => {
     const [messages, setMessages] = useState<Message[]>([]);
