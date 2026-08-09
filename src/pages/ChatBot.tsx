@@ -8,9 +8,9 @@ import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognitio
 
 interface Message { role: "user" | "assistant"; content: string; }
 
-const API_URL = import.meta.env.VITE_BACKEND_URL
-    ? `${import.meta.env.VITE_BACKEND_URL.replace(/\/$/, '')}/api/chat`
-    : (import.meta.env.PROD ? '/api/chat' : 'http://localhost:3001/api/chat');
+// The Vite dev proxy routes this to the local Node server, and Vercel
+// natively routes it to the api/chat.ts serverless function in production.
+const API_URL = '/api/chat';
 
 const ChatBot = () => {
     const [messages, setMessages] = useState<Message[]>([]);
@@ -19,7 +19,6 @@ const ChatBot = () => {
     const isTypingRef = useRef(false);
     const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
 
-    // Only update input from voice when actively listening AND user is not typing
     useEffect(() => {
         if (listening && transcript && !isTypingRef.current) {
             setInput(transcript);
@@ -59,14 +58,14 @@ const ChatBot = () => {
         if (listening) {
             SpeechRecognition.stopListening();
         } else {
-            isTypingRef.current = false; // Reset typing flag when voice starts
+            isTypingRef.current = false;
             resetTranscript();
             SpeechRecognition.startListening({ continuous: true });
         }
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        isTypingRef.current = true; // Mark as typing manually
+        isTypingRef.current = true;
         setInput(e.target.value);
     };
 

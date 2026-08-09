@@ -14,8 +14,21 @@ const firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase only if config is available
-const app = firebaseConfig.apiKey ? initializeApp(firebaseConfig) : null;
+const isValidFirebaseField = (value: string | undefined) => {
+    return Boolean(value) && !value.includes('YOUR_') && !value.includes('example');
+};
+
+const shouldInitializeFirebase = [
+    firebaseConfig.apiKey,
+    firebaseConfig.authDomain,
+    firebaseConfig.projectId,
+    firebaseConfig.storageBucket,
+    firebaseConfig.messagingSenderId,
+    firebaseConfig.appId,
+].every(isValidFirebaseField) && firebaseConfig.apiKey.startsWith('AIza');
+
+// Initialize Firebase only if config looks valid
+const app = shouldInitializeFirebase ? initializeApp(firebaseConfig) : null;
 
 // Export services for future use
 export const auth = app ? getAuth(app) : null;

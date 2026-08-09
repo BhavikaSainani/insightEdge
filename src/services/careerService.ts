@@ -3,8 +3,8 @@
  * Communicates with the FastAPI Career Advisor backend
  */
 
-const CAREER_API_URL = import.meta.env.VITE_PYTHON_API_URL
-    ? import.meta.env.VITE_PYTHON_API_URL.replace(/\/$/, '')
+const CAREER_API_URL = import.meta.env.VITE_CAREER_API_URL
+    ? import.meta.env.VITE_CAREER_API_URL.replace(/\/$/, '')
     : '/api';
 
 export interface ResumeUploadResponse {

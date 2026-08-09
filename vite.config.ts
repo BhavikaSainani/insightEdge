@@ -12,6 +12,14 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
     proxy: {
+      // The AI chatbot runs on the local Node/Express server and, in
+      // production, as a Vercel Serverless Function at /api/chat — so this
+      // specific route must be proxied separately from the rest of /api.
+      '/api/chat': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+      // Everything else under /api goes to the Python Career API.
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,
