@@ -31,3 +31,5 @@ dist-ssr
 career_api/uploads/*
 !career_api/uploads/.gitkeep
 *.sqlite3
+
+insightEdge/
