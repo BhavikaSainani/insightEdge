@@ -19,6 +19,22 @@ export interface FetchedNewsItem {
 }
 
 /**
+ * Strip HTML tags from RSS text (some feeds embed a raw <a href="..."> link
+ * inside the description, which would otherwise render as literal text).
+ */
+function stripHtml(text: string): string {
+  return text
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .trim();
+}
+
+/**
  * Fetch news from RSS feeds
  */
 async function fetchRSSFeed(url: string, sourceName: string): Promise<FetchedNewsItem[]> {
@@ -43,8 +59,8 @@ async function fetchRSSFeed(url: string, sourceName: string): Promise<FetchedNew
     // everything and leaving the page with zero articles.
     return data.items
       .map((item: any) => ({
-        title: item.title || 'Untitled',
-        description: item.description || item.content || '',
+        title: stripHtml(item.title || 'Untitled'),
+        description: stripHtml(item.description || item.content || ''),
         url: item.link || '',
         publishedDate: item.pubDate || new Date().toISOString(),
         source: sourceName,
