@@ -1,14 +1,5 @@
 services:
   - type: web
-    name: insightedge-express-backend
-    env: node
-    buildCommand: npm install
-    startCommand: npm run server
-    envVars:
-      - key: GEMINI_API_KEY
-        sync: false
-
-  - type: web
     name: insightedge-career-api
     env: python
     buildCommand: pip install -r career_api/requirements.txt
