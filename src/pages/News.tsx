@@ -61,8 +61,9 @@ const News = () => {
 
       setArticles(filteredNews);
 
-      // Get featured article
-      const featured = await getFeaturedArticle(dateFilter);
+      // Get featured article from the list we already fetched, so it can
+      // never disagree with (or disappear from) the list below it.
+      const featured = await getFeaturedArticle(dateFilter, filteredNews);
       setFeaturedArticle(featured);
 
       // Exclude featured from main list

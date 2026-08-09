@@ -37,12 +37,11 @@ async function fetchRSSFeed(url: string, sourceName: string): Promise<FetchedNew
       return [];
     }
     
+    // These RSS sources (e.g. Times of India Cities/Tech feeds) are already
+    // topic-scoped by the source itself, so we trust them as-is instead of
+    // re-filtering by exact keyword match, which was discarding almost
+    // everything and leaving the page with zero articles.
     return data.items
-      .filter((item: any) => {
-        // Filter for Smart Cities related content
-        const text = `${item.title} ${item.description || ''}`.toLowerCase();
-        return smartCityKeywords.some(keyword => text.includes(keyword));
-      })
       .map((item: any) => ({
         title: item.title || 'Untitled',
         description: item.description || item.content || '',
@@ -253,12 +252,19 @@ export async function fetchAllNews(
   const filteredItems = allItems.filter(item => {
     const itemDate = new Date(item.publishedDate);
     
+    // Guard against unparseable dates from RSS/API sources so a single bad
+    // item doesn't silently disappear from the list.
+    if (isNaN(itemDate.getTime())) {
+      return true;
+    }
+
     if (dateFilter === 'past30days') {
       return itemDate >= thirtyDaysAgo && itemDate <= now;
     } else {
-      // Latest: last 7 days
-      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      return itemDate >= sevenDaysAgo;
+      // Latest: last 14 days (widened from 7 — RSS feeds don't always
+      // publish daily, and a narrow window was leaving the page empty)
+      const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+      return itemDate >= fourteenDaysAgo;
     }
   });
   

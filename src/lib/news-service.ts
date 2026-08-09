@@ -99,9 +99,20 @@ export async function getNewsByCategory(
 /**
  * Get featured article (most recent)
  */
+/**
+ * Get featured article (most recent).
+ * Falls back to the same mock data as getNewsWithFallback so the featured
+ * story stays in sync with the list below it instead of independently
+ * re-fetching and possibly returning null while the list has articles.
+ */
 export async function getFeaturedArticle(
-  dateFilter: 'latest' | 'past30days' = 'latest'
+  dateFilter: 'latest' | 'past30days' = 'latest',
+  articles?: NewsArticle[]
 ): Promise<NewsArticle | null> {
+  if (articles && articles.length > 0) {
+    return articles[0];
+  }
+
   const news = dateFilter === 'latest' 
     ? await getLatestNews()
     : await getPast30DaysNews();
