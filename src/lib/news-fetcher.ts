@@ -120,23 +120,44 @@ async function fetchNewsAPI(apiKey: string): Promise<FetchedNewsItem[]> {
 /**
  * Categorize article based on content
  */
+/**
+ * Categorize article based on content.
+ * Uses broader keyword sets per category so articles spread across
+ * categories instead of nearly all defaulting to "Smart Cities" — general
+ * city-news RSS feeds rarely use narrow terms like "mobility" verbatim.
+ */
 function categorizeArticle(item: FetchedNewsItem): NewsCategory {
   const text = `${item.title} ${item.description}`.toLowerCase();
-  
-  if (text.includes('mobility') || text.includes('transport') || text.includes('traffic')) {
-    return 'Urban Mobility';
-  }
-  if (text.includes('infrastructure') || text.includes('disaster') || text.includes('resilience')) {
-    return 'Infrastructure';
-  }
-  if (text.includes('sustainability') || text.includes('carbon') || text.includes('energy') || text.includes('green')) {
-    return 'Sustainability';
-  }
-  if (text.includes('governance') || text.includes('policy') || text.includes('government') || text.includes('data.gov')) {
-    return 'Governance & Policy';
-  }
-  if (text.includes('technology') || text.includes('digital') || text.includes('IoT') || text.includes('AI')) {
-    return 'Technology in Cities';
+
+  const categoryKeywords: [NewsCategory, string[]][] = [
+    ['Urban Mobility', [
+      'mobility', 'transport', 'traffic', 'metro', 'bus', 'railway', 'road',
+      'commute', 'vehicle', 'parking', 'highway', 'flyover',
+    ]],
+    ['Infrastructure', [
+      'infrastructure', 'disaster', 'resilience', 'construction', 'bridge',
+      'water supply', 'sewage', 'drainage', 'power grid', 'housing', 'civic',
+    ]],
+    ['Sustainability', [
+      'sustainability', 'carbon', 'energy', 'green', 'climate', 'pollution',
+      'waste', 'recycl', 'renewable', 'solar', 'air quality', 'environment',
+    ]],
+    ['Governance & Policy', [
+      'governance', 'policy', 'government', 'data.gov', 'municipal',
+      'corporation', 'civic body', 'budget', 'election', 'ministry', 'bmc',
+      'panchayat', 'law', 'regulation',
+    ]],
+    ['Technology in Cities', [
+      'technology', 'digital', 'iot', 'ai', 'artificial intelligence', 'app',
+      'startup', 'software', 'data', 'cyber', 'internet', 'smart meter',
+      'surveillance', 'camera', 'sensor',
+    ]],
+  ];
+
+  for (const [category, keywords] of categoryKeywords) {
+    if (keywords.some(keyword => text.includes(keyword))) {
+      return category;
+    }
   }
   
   return 'Smart Cities';
